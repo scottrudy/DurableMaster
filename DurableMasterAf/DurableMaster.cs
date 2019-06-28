@@ -31,7 +31,7 @@ namespace DurableAf {
             [OrchestrationTrigger] DurableOrchestrationContext context, ILogger log) {
             try {
                 // This activity will perform some call to an external action that will require a callback
-                var result = await context.CallActivityAsync<bool>(nameof(DurableMaster_ExternalActionActivity), null);
+                var result = await context.CallActivityAsync<bool>(nameof(DurableMaster_ExternalActionActivity), context.InstanceId);
                 if (!context.IsReplaying) 
                     log.LogWarning($"Call http://localhost:7072/api/DurableMaster_Callback?eventName={EVENTNAME}&payload=I%20did%20it&instanceId={context.InstanceId} in 30 seconds or this orchestration will timeout.");
                 // This will cause the durable function to halt until the external action raises the proper event, or 30 seconds elapses
@@ -48,10 +48,14 @@ namespace DurableAf {
         }
 
         [FunctionName(nameof(DurableMaster_ExternalActionActivity))]
-        public static async Task<bool> DurableMaster_ExternalActionActivity([ActivityTrigger] string value, ILogger log) {
+        public static async Task<bool> DurableMaster_ExternalActionActivity([ActivityTrigger] string instanceId, ILogger log) {
             try {
                 // This action will kick off an external action, such as another Durable Function Orchestration in another task hub
-                var response = await _client.PostAsJsonAsync("https://www.google.com", "somevalue");
+                // Note that the instanceId and event name are passed in so they can be used by the external action to execute the callback
+                var response = await _client.PostAsJsonAsync("https://www.google.com", new {
+                    InstanceId = instanceId,
+                    EventName = EVENTNAME
+                });
                 return response.IsSuccessStatusCode;
             } finally {
                 log.LogInformation($"~Completed DurableMaster_ExternalActionActivity.");
