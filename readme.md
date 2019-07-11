@@ -24,8 +24,7 @@ This project can be cloned and run from the command line using dotnet core and A
 1. [Start Azure Storage Emulator](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator#start-and-initialize-the-storage-emulator)
 2. Navigate to the IssueAf project directory
 3. `func start`
-4. Test the application with a get request to http://localhost:7072/api/OrderIssue_HttpStart (You will need the JSON response from the function)
-5. Grab the response from the statusQueryGetUri in the JSON response from step 4.
+4. Test the application with a get request to http://localhost:7072/api/DurableMaster_HttpStart (You will need the JSON response from the function)
 
 ### See problem 
 Open Storage Explorer
